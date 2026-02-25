@@ -1,5 +1,5 @@
 import { StrictMode } from 'react'
-console.log('BUILD_B', new Date().toISOString())
+console.log("App loaded, build version: 20260226_0635");
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'

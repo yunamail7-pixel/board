@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, User, Loader2 } from 'lucide-react'
+import { ArrowLeft, Calendar, User, Loader2, Link as LinkIcon } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export default function NewsDetail() {
@@ -48,7 +48,17 @@ export default function NewsDetail() {
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="px-5 py-6 sm:p-8 space-y-6">
+            {post.image_url && (
+                <div className="w-full h-48 sm:h-72 md:h-96 bg-slate-100 relative overflow-hidden group">
+                    <img
+                        src={post.image_url}
+                        alt={post.title}
+                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    />
+                </div>
+            )}
+
+            <div className={`px-5 py-6 sm:p-8 space-y-6 ${post.image_url ? 'pt-6 sm:pt-8' : ''}`}>
                 {/* 返回按鈕 */}
                 <Link
                     to="/"
@@ -82,9 +92,24 @@ export default function NewsDetail() {
                 </div>
 
                 {/* 文章內容：保留換行符號的渲染方式 */}
-                <div className="prose prose-slate prose-green max-w-none text-slate-700 pb-8 whitespace-pre-wrap">
+                <div className="prose prose-slate prose-green max-w-none text-slate-700 whitespace-pre-wrap leading-relaxed">
                     {post.content}
                 </div>
+
+                {/* 外部連結 / 報名按鈕 */}
+                {post.link_url && (
+                    <div className="pt-8 pb-4">
+                        <a
+                            href={post.link_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 bg-brand-green hover:bg-green-600 active:bg-green-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 w-full sm:w-auto text-lg"
+                        >
+                            <LinkIcon className="w-5 h-5" />
+                            前往報名 / 查看詳細連結
+                        </a>
+                    </div>
+                )}
             </div>
         </div>
     )
