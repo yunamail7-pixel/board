@@ -4,11 +4,13 @@ import { useEffect } from 'react'
 export default function ImageLightbox({ imageUrl, onClose }) {
     // 避免背景滾動
     useEffect(() => {
+        if (!imageUrl) return
+
         document.body.style.overflow = 'hidden'
         return () => {
-            document.body.style.overflow = 'unset'
+            document.body.style.overflow = ''
         }
-    }, [])
+    }, [imageUrl])
 
     if (!imageUrl) return null
 
