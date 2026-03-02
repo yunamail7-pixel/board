@@ -1,5 +1,5 @@
 import { Outlet, Link } from 'react-router-dom'
-import { Leaf } from 'lucide-react'
+
 
 export default function MainLayout() {
     return (
@@ -8,7 +8,7 @@ export default function MainLayout() {
             <header className="sticky top-0 z-50 bg-white shadow-sm">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-2 text-brand-green font-bold text-xl tracking-wide">
-                        <Leaf className="w-6 h-6" />
+                        <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
                         <span>綠綠因子健康生活</span>
                     </Link>
                     <div className="text-sm font-medium text-slate-500">

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, User, Loader2, Link as LinkIcon } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import ImageLightbox from '../components/ImageLightbox'
 
 export default function NewsDetail() {
     const { id } = useParams()
     const navigate = useNavigate()
     const [post, setPost] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [selectedImage, setSelectedImage] = useState(null)
 
     useEffect(() => {
         fetchPostDetails()
@@ -53,7 +55,8 @@ export default function NewsDetail() {
                     <img
                         src={post.image_url}
                         alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 cursor-pointer"
+                        onClick={() => setSelectedImage(post.image_url)}
                     />
                 </div>
             )}
@@ -111,6 +114,11 @@ export default function NewsDetail() {
                     </div>
                 )}
             </div>
+
+            <ImageLightbox
+                imageUrl={selectedImage}
+                onClose={() => setSelectedImage(null)}
+            />
         </div>
     )
 }

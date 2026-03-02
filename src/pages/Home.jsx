@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, ChevronRight, Loader2, ImagePlus } from 'lucide-react'
+import { Calendar, ChevronRight, Loader2, ImagePlus, Pin } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import ImageLightbox from '../components/ImageLightbox'
 
 export default function Home() {
     const [news, setNews] = useState([])
     const [loading, setLoading] = useState(true)
+    const [selectedImage, setSelectedImage] = useState(null)
 
     useEffect(() => {
         fetchNews()
@@ -16,6 +18,7 @@ export default function Home() {
             const { data, error } = await supabase
                 .from('posts')
                 .select('*')
+                .order('is_pinned', { ascending: false })
                 .order('created_at', { ascending: false })
 
             if (error) throw error
@@ -60,7 +63,11 @@ export default function Home() {
                                         <img
                                             src={item.image_url}
                                             alt={item.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                setSelectedImage(item.image_url)
+                                            }}
                                         />
                                     </div>
                                 )}
@@ -68,6 +75,12 @@ export default function Home() {
                                 <div className="p-5 flex-1 flex items-start justify-between gap-4">
                                     <div className="flex-1 space-y-3">
                                         <div className="flex items-center gap-3">
+                                            {item.is_pinned && (
+                                                <span className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">
+                                                    <Pin className="w-3 h-3 fill-red-700" />
+                                                    置頂
+                                                </span>
+                                            )}
                                             <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${item.category === '活動' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'
                                                 }`}>
                                                 {item.category}
@@ -77,7 +90,7 @@ export default function Home() {
                                                 {formatDate(item.created_at)}
                                             </div>
                                         </div>
-                                        <h2 className="text-xl font-semibold text-slate-800 group-hover:text-brand-green transition-colors line-clamp-2 leading-tight">
+                                        <h2 className={`text-xl font-semibold text-slate-800 group-hover:text-brand-green transition-colors line-clamp-2 leading-tight ${item.is_pinned ? 'text-red-900 group-hover:text-red-700' : ''}`}>
                                             {item.title}
                                         </h2>
                                         <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">
@@ -99,6 +112,11 @@ export default function Home() {
                     )}
                 </div>
             )}
+
+            <ImageLightbox
+                imageUrl={selectedImage}
+                onClose={() => setSelectedImage(null)}
+            />
         </div>
     )
 }

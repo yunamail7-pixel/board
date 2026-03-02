@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Trash2, LogOut, Loader2, X, ImagePlus, Link as LinkIcon, AlertCircle } from 'lucide-react'
+import { Plus, Trash2, LogOut, Loader2, X, ImagePlus, Link as LinkIcon, AlertCircle, Pin, PinOff } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminDashboard() {
@@ -10,7 +10,7 @@ export default function AdminDashboard() {
 
     // 新增/編輯 Modal 狀態
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [formData, setFormData] = useState({ title: '', category: '活動', content: '', link_url: '' })
+    const [formData, setFormData] = useState({ title: '', category: '活動', content: '', link_url: '', is_pinned: false })
     const [imageFile, setImageFile] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
@@ -24,6 +24,7 @@ export default function AdminDashboard() {
             const { data, error } = await supabase
                 .from('posts')
                 .select('*')
+                .order('is_pinned', { ascending: false })
                 .order('created_at', { ascending: false })
 
             if (error) throw error
@@ -56,6 +57,20 @@ export default function AdminDashboard() {
             setPosts(posts.filter(p => p.id !== id))
         } catch (error) {
             alert('刪除失敗: ' + error.message)
+        }
+    }
+
+    const handleTogglePin = async (id, currentPinStatus) => {
+        try {
+            const { error } = await supabase
+                .from('posts')
+                .update({ is_pinned: !currentPinStatus })
+                .eq('id', id)
+
+            if (error) throw error
+            fetchPosts() // 重新擷取以更新排序
+        } catch (error) {
+            alert('更新置頂狀態失敗: ' + error.message)
         }
     }
 
@@ -114,7 +129,8 @@ export default function AdminDashboard() {
                     category: formData.category,
                     content: formData.content,
                     link_url: formData.link_url || null,
-                    image_url: uploadedImageUrl
+                    image_url: uploadedImageUrl,
+                    is_pinned: formData.is_pinned
                 }
             ])
 
@@ -131,7 +147,7 @@ export default function AdminDashboard() {
 
     const closeModal = () => {
         setIsModalOpen(false)
-        setFormData({ title: '', category: '活動', content: '', link_url: '' })
+        setFormData({ title: '', category: '活動', content: '', link_url: '', is_pinned: false })
         setImageFile(null)
         setImagePreview(null)
     }
@@ -213,7 +229,10 @@ export default function AdminDashboard() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 font-medium text-slate-900">
-                                                {post.title}
+                                                <div className="flex items-center gap-2">
+                                                    {post.is_pinned && <Pin className="w-4 h-4 text-red-500 fill-red-100" title="已置頂" />}
+                                                    {post.title}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex gap-2 text-slate-400">
@@ -226,6 +245,13 @@ export default function AdminDashboard() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end gap-3">
+                                                    <button
+                                                        onClick={() => handleTogglePin(post.id, post.is_pinned)}
+                                                        className={`p-2 rounded-md transition-colors ${post.is_pinned ? 'text-red-500 bg-red-50 hover:bg-red-100' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}
+                                                        title={post.is_pinned ? "取消置頂" : "設為置頂"}
+                                                    >
+                                                        {post.is_pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
+                                                    </button>
                                                     <button
                                                         onClick={() => handleDelete(post.id, post.image_url)}
                                                         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
@@ -295,6 +321,18 @@ export default function AdminDashboard() {
                                             value={formData.title}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                         />
+                                    </div>
+                                    <div className="sm:col-span-3">
+                                        <label className="flex items-center gap-2 cursor-pointer p-3 bg-red-50 text-red-700 rounded-lg border border-red-100 hover:bg-red-100 transition-colors">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded text-red-600 focus:ring-red-500"
+                                                checked={formData.is_pinned}
+                                                onChange={(e) => setFormData({ ...formData, is_pinned: e.target.checked })}
+                                            />
+                                            <Pin className="w-4 h-4" />
+                                            <span className="font-medium text-sm text-red-800">將這則消息設為「置頂」顯示在最上方</span>
+                                        </label>
                                     </div>
                                 </div>
 
